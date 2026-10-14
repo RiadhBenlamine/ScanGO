@@ -13,10 +13,9 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-
 type Result struct {
-	Port string
-	Open bool
+	Port  string
+	Open  bool
 	Proto string
 }
 
@@ -26,6 +25,7 @@ type Config struct {
 	Threads int
 	Udp     bool
 }
+
 func banner() {
 	fmt.Println("=====================================================================")
 	fmt.Println("                            ScanGO                      ")
@@ -134,7 +134,7 @@ func main() {
 	host := config.Target
 	if !config.Udp {
 		fmt.Println("Preforming TCP scan.")
-	}else{
+	} else {
 		fmt.Println("Preforming UDP scan.")
 	}
 	if host == "" {
@@ -161,7 +161,7 @@ func main() {
 		wg.Wait()
 		close(results)
 	}()
-	var counter int64
+	var counter int
 	for r := range results {
 		if r.Open {
 			counter++
@@ -173,6 +173,6 @@ func main() {
 	total := end.Sub(start)
 	fmt.Println("Time taken:", total)
 	fmt.Println("Total ports open:", counter)
-	fmt.Println("Ports closed/filtered:", len(list))
+	fmt.Println("Ports closed/filtered:", len(list)-counter)
 
 }
