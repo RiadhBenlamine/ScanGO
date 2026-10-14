@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 type Result struct {
@@ -14,12 +15,13 @@ type Result struct {
 }
 
 func scan(addr string, result chan<- Result) {
-	conn, err := net.Dial("tcp", addr)
+	conn, err := net.DialTimeout("tcp", addr, time.Second*2)
 	getPort := strings.Split(addr, ":")[1]
-	defer conn.Close()
 	if err != nil {
 		result <- Result{Port: getPort, Open: false}
+		return
 	}
+	conn.Close()
 	result <- Result{Port: getPort, Open: true}
 }
 func worker(jobs <-chan string, results chan<- Result, wg *sync.WaitGroup) {
@@ -51,6 +53,7 @@ func main() {
 		for _, port := range list {
 			jobs <- net.JoinHostPort(host, strconv.Itoa(port))
 		}
+		close(jobs)
 	}()
 
 	go func() {
